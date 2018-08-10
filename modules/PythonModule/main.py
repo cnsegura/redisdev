@@ -65,10 +65,29 @@ def module_twin_callback(update_state, payload, user_context):
         if UPDATE_REDIS == "yes":
             #write values to Redis DB
             r = redis.Redis(host='redisedge', port=6379)
-            r.set('foo', 'bar')
-            value = r.get('foo')
+            #r.set('foo', 'bar') //commenting out for testing of streams
 
-            print(value)
+            #test redis streams
+            xaddstream = 'XADD frameStream * '
+            xaddkey = 'frame ' #could combine with above - leaving as is for now
+            aireturn = 'apple'
+            aiconfidence '99.99%'
+            for x in range (0, 4):
+                #write stream
+                writeString = xaddstream + xaddkey + str(x)
+                data = r.execute_command(writeString)
+
+                dictionary = str(x) +  aireturn + 'confidence' + aiconfidence
+                r.hmset('airesults', dictionary)
+            
+            readstream = 'XRANGE frameStream - +"'
+            streamvalue = r.execute_command(readstream)
+            print(streamvalue)
+
+            readhash = r.hgetall(airesults)
+            print('\n'streamvalue)
+
+            #print(value)
     TWIN_CALLBACKS += 1
     print ( "Total calls confirmed: %d\n" % TWIN_CALLBACKS )
 
