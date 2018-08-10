@@ -70,22 +70,39 @@ def module_twin_callback(update_state, payload, user_context):
             #test redis streams
             xaddstream = 'XADD frameStream * '
             xaddkey = 'frame ' #could combine with above - leaving as is for now
-            aireturn = 'apple'
-            aiconfidence '99.99%'
+            aireturn = 'apple '
+            aiconfidence = '99.99 '
             for x in range (0, 4):
                 #write stream
                 writeString = xaddstream + xaddkey + str(x)
                 data = r.execute_command(writeString)
+                #key = str(x)
+                if x  == 0:
+                    index = "zero"
+                if x == 1:
+                    index = "one"
+                if x == 2:
+                    index = "two"
+                if x == 3:
+                    index = "three"
+                if x == 4:
+                    index = "four"
+                if x == 5:
+                    index = "five"
+                dictionary = index + " " + aireturn + 'confidence ' + aiconfidence
+                print("Dictionary is %s \n" % dictionary)
 
-                dictionary = str(x) +  aireturn + 'confidence' + aiconfidence
-                r.hmset('airesults', dictionary)
+                r.hmset("airesults", dictionary)
+                #clear dictionary string
+                dictionary = ""
             
-            readstream = 'XRANGE frameStream - +"'
+            readstream = 'XRANGE frameStream - +'
             streamvalue = r.execute_command(readstream)
             print(streamvalue)
 
             readhash = r.hgetall(airesults)
-            print('\n'streamvalue)
+            print('\n')
+            print(readhash)
 
             #print(value)
     TWIN_CALLBACKS += 1
