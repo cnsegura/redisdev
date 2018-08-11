@@ -69,33 +69,29 @@ def module_twin_callback(update_state, payload, user_context):
 
             #test redis streams
             xaddstream = 'XADD frameStream * '
-            xaddkey = 'frame ' #could combine with above - leaving as is for now
-            aireturn = 'apple '
-            aiconfidence = '99.99 '
-            for x in range (0, 4):
-                #write stream
-                writeString = xaddstream + xaddkey + str(x)
-                data = r.execute_command(writeString)
-                #key = str(x)
-                if x  == 0:
-                    index = "zero"
-                if x == 1:
-                    index = "one"
-                if x == 2:
-                    index = "two"
-                if x == 3:
-                    index = "three"
-                if x == 4:
-                    index = "four"
-                if x == 5:
-                    index = "five"
-                dictionary = index + " " + aireturn + 'confidence ' + aiconfidence
-                print("Dictionary is %s \n" % dictionary)
+            xaddkey = 'frame' #could combine with above - leaving as is for now
 
-                r.hmset("airesults", dictionary)
-                #clear dictionary string
-                dictionary = ""
-            
+            # test redis hash tables
+            aireturn = 'apple'
+            aiconfidence = '99.99'
+            for x in range (0, 4):
+                #write stream - XADD frameStream * frame x
+                strint = str(x)
+                writeString = xaddstream + xaddkey + " " + strint
+                #debug
+                print("writeStraing for stream entry is: %s\n" % writeString)
+                data = r.execute_command(writeString)
+
+                #prepare to write hash table
+                d = {}
+                d["frame"] = x
+                d["type"] = aireturn
+                d["confidence"] = aiconfidence
+                
+                print("Dictionary is: %s \n" % d)
+
+                r.hmset("airesults", d)
+                            
             readstream = 'XRANGE frameStream - +'
             streamvalue = r.execute_command(readstream)
             print(streamvalue)
