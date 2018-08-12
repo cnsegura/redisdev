@@ -74,31 +74,37 @@ def module_twin_callback(update_state, payload, user_context):
             # test redis hash tables
             aireturn = 'apple'
             aiconfidence = '99.99'
+            d = {}
+            tstampset = set()
             for x in range (0, 4):
                 #write stream - XADD frameStream * frame x
                 strint = str(x)
                 writeString = xaddstream + xaddkey + " " + strint
                 #debug
-                print("writeStraing for stream entry is: %s\n" % writeString)
-                data = r.execute_command(writeString)
+                #print("writeStraing for stream entry is: %s\n" % writeString)
+                timestamp = r.execute_command(writeString)
+                #print('Returned data from stream post is: %s \n' % timestamp)
+                tstampset.add(timestamp)
+                
 
                 #prepare to write hash table
-                d = {}
-                d["frame"] = x
                 d["type"] = aireturn
                 d["confidence"] = aiconfidence
                 
-                print("Dictionary is: %s \n" % d)
+                #print("Dictionary is: %s \n" % d)
 
-                r.hmset("airesults", d)
+                r.hmset(str(timestamp), d)
+                d.clear()
                             
             readstream = 'XRANGE frameStream - +'
             streamvalue = r.execute_command(readstream)
+            print('\nRedis stream is : ')
             print(streamvalue)
 
-            readhash = r.hgetall(airesults)
-            print('\n')
-            print(readhash)
+            for frameid in tstampset:
+                readhash = r.hgetall(str(frameid))
+                print('\nRedis Hash Table %s is:' % str(frameid))
+                print('%s' % readhash)
 
             #print(value)
     TWIN_CALLBACKS += 1
